@@ -6,6 +6,7 @@ router.get('/', (req, res) => {
     res.json({status: 'status'});
 });
 
+
 router.get('/api/blog-post', BlogPostController.getPosts); // Get all posts
 router.get('/api/:user_id/blog-post', BlogPostController.getUserPosts); // Get all user posts
 router.get('/api/:user_id/blog-post/post_id', BlogPostController.getUserPost) // Get particular post
