@@ -16,6 +16,4 @@ router.patch('/api/:user_id/blog-post/:post_id', BlogPostController.updatePost);
 
 router.delete('/api/:user_id/blog-post/:post_id', BlogPostController.updatePost); // Remove particular post
 
-
-
 module.exports = router;
