@@ -1,5 +1,5 @@
 const express = require('express');
-const BlogPostController = require('../controllers/BlogPostController');
+const ProductsController = require('../controllers/ProductsController');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -7,14 +7,14 @@ router.get('/', (req, res) => {
 });
 
 
-router.get('/api/blog-post', BlogPostController.getPosts); // Get all posts
-router.get('/api/:user_id/blog-post', BlogPostController.getUserPosts); // Get all user posts
-router.get('/api/:user_id/blog-post/post_id', BlogPostController.getUserPost) // Get particular post
+router.get('/api/products', ProductsController.getProducts); // Get all products
+router.get('/api/:user_id/products', ProductsController.getUserProducts); // Get all user products
+router.get('/api/:user_id/products/"product_id', ProductsController.getUserProduct) // Get particular product
 
-router.post('/api/:user_id/blog-post', BlogPostController.createBlogPost); // Create a new post for a user
+router.post('/api/:user_id/products', ProductsController.createProduct); // Create a new product for a user
 
-router.patch('/api/:user_id/blog-post/:post_id', BlogPostController.updatePost); // Update an existing post for paticular user
+router.patch('/api/:user_id/products/:product_id', ProductsController.updateProduct); // Update an existing product for paticular user
 
-router.delete('/api/:user_id/blog-post/:post_id', BlogPostController.updatePost); // Remove particular post
+router.delete('/api/:user_id/products/:product_id', ProductsController.deleteProduct); // Remove particular product
 
 module.exports = router;
