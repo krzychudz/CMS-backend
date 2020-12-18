@@ -32,3 +32,7 @@ exports.deleteProduct = (req, res) => {
     const userId = req.params.user_id;
     const postId = req.params.post_id;
 }
+
+exports.findProduct = (req, res) => {
+    var query = req.query.query;
+}
