@@ -1,24 +1,32 @@
 const { json } = require('body-parser');
+const { traceDeprecation } = require('process');
 const firestoreDb = require('../firebase');
 const idGenerator = require('../helpers/IdGenerator');
 
 
-exports.createProduct = (req, res) => {
+exports.createProduct = async (req, res) => {
     const userId = req.params.user_id;
     const body = req.body;
-    const productId = idGenerator.generateUniqueFirestoreId();
 
-    body.productId = productId;
     body.ownerId = userId;
 
-    firestoreDb.collection("Products").doc(productId).set(
-        body
-    ).then(() => {
-        res.status(201).json(body);
-    });
+    await firestoreDb.collection("Products").add(body);
+    res.status(201).json(body);
+  
 };
 
-exports.getProducts = (req, res) => {
+exports.getProducts = async (req, res) => {
+    const querySnapshot = await firestoreDb.collection("Products").where("isPublished", "==", true).get();
+
+    querySnapshot.docs.forEach((document) => {
+        console.log(document.data());
+    });
+
+    const productsResponse = querySnapshot.docs.map((document) => {
+        return {productId: document.id, ...document.data()}
+    });
+
+    res.status(201).json(productsResponse);
 
 }
 
