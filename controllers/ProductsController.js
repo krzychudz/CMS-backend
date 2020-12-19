@@ -1,12 +1,20 @@
 const { json } = require('body-parser');
 const firestoreDb = require('../firebase');
+const idGenerator = require('../helpers/IdGenerator');
 
 
 exports.createProduct = (req, res) => {
-    firestoreDb.collection('blog-posts').doc("test").set({
-        "test": "test"
-    }).then((val) => {
-        res.status(201).json(val);
+    const userId = req.params.user_id;
+    const body = req.body;
+    const productId = idGenerator.generateUniqueFirestoreId();
+
+    body.productId = productId;
+    body.ownerId = userId;
+
+    firestoreDb.collection("Products").doc(productId).set(
+        body
+    ).then(() => {
+        res.status(201).json(body);
     });
 };
 
@@ -20,17 +28,17 @@ exports.getUserProducts = (req, res) => {
 
 exports.getUserProduct = (req, res) => {
     const userId = req.params.user_id;
-    const postId = req.params.post_id;
+    const productiId = req.params.product_id;
 }
 
 exports.updateProduct = (req, res) => {
     const userId = req.params.user_id;
-    const postId = req.params.post_id;
+    const productiId = req.params.product_id;
 }
 
 exports.deleteProduct = (req, res) => {
     const userId = req.params.user_id;
-    const postId = req.params.post_id;
+    const productiId = req.params.product_id;
 }
 
 exports.findProduct = (req, res) => {
