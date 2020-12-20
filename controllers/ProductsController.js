@@ -30,8 +30,16 @@ exports.getProducts = async (req, res) => {
 
 }
 
-exports.getUserProducts = (req, res) => {
+exports.getUserProducts = async (req, res) => {
     const userId = req.params.user_id;
+
+    const querySnapshot = await firestoreDb.collection("Products").where("ownerId", "==", userId).get();
+
+    const productsResponse = querySnapshot.docs.map((document) => {
+            return {productId: document.id, ...document.data()}
+    });
+
+    res.status(201).json(productsResponse);
 }
 
 exports.getUserProduct = (req, res) => {
