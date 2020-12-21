@@ -4,22 +4,21 @@ const { traceDeprecation } = require('process');
 const firestoreDb = require('../firebase');
 const idGenerator = require('../helpers/IdGenerator');
 
+const productsCollection = "Products";
 
 exports.createProduct = async (req, res) => {
     const userId = req.params.user_id;
     const body = req.body;
-    const productId = idGenerator.generateUniqueFirestoreId();
-
+ 
     body.ownerId = userId;
-    body.productId = productId;
 
-    await firestoreDb.collection("Products").doc(productId).set(body);
+    await firestoreDb.collection(productsCollection).add(body);
     res.status(201).json(body);
   
 };
 
 exports.getProducts = async (req, res) => {
-    const querySnapshot = await firestoreDb.collection("Products").where("isPublished", "==", true).get();
+    const querySnapshot = await firestoreDb.collection(productsCollection).where("isPublished", "==", true).get();
 
     querySnapshot.docs.forEach((document) => {
         console.log(document.data());
@@ -36,7 +35,7 @@ exports.getProducts = async (req, res) => {
 exports.getUserProducts = async (req, res) => {
     const userId = req.params.user_id;
 
-    const querySnapshot = await firestoreDb.collection("Products").where("ownerId", "==", userId).get();
+    const querySnapshot = await firestoreDb.collection(productsCollection).where("ownerId", "==", userId).get();
 
     const productsResponse = querySnapshot.docs.map((document) => {
             return {productId: document.id, ...document.data()}
@@ -45,27 +44,52 @@ exports.getUserProducts = async (req, res) => {
     res.status(201).json(productsResponse);
 }
 
-exports.getUserProduct = (req, res) => {
+exports.getUserProduct = async (req, res) => {
     const userId = req.params.user_id;
     const productId = req.params.product_id;
 
-    const querySnapshot = await firestoreDb.collection("Products").where("ownerId", "==", userId).where("productId", "==", productId).get();
+    const querySnapshot = await firestoreDb.collection(productsCollection).doc(productId).get();
 
-    const productsResponse = querySnapshot.docs.map((document) => {
-        return {...document.data()}
-    });
+    const data = querySnapshot.data();
+    
+    if (data === undefined || data === null) {
+        res.status(404).json({"message": "Not found"})
+    }
+    
+    if (data.ownerId != userId) {
+        res.status(401).json({"message:": "Unauthorized"});
+    }
 
-    res.status(201).json(productsResponse);
+    data.productId = querySnapshot.id;
+
+    res.status(201).json(data);
 }
 
-exports.updateProduct = (req, res) => {
+exports.updateProduct = async (req, res) => {
     const userId = req.params.user_id;
-    const productiId = req.params.product_id;
+    const productId = req.params.product_id;
+    const body = req.body;
+
+    try {
+       await firestoreDb.collection(productsCollection).doc(productId).update(body);
+    } catch (error) {
+       res.status(500).json(error); 
+    }
+
+    res.status(201).json(body);
 }
 
-exports.deleteProduct = (req, res) => {
+exports.deleteProduct = async (req, res) => {
     const userId = req.params.user_id;
-    const productiId = req.params.product_id;
+    const productId = req.params.product_id;
+
+    try {
+        await firestoreDb.collection(productsCollection).doc(productId).delete();
+    } catch (error) {
+        res.status(500).json(error);
+    }
+
+    res.status(201).json({"message": `Item ${productId} has been removed`});
 }
 
 exports.findProduct = (req, res) => {
