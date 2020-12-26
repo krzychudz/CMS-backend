@@ -5,6 +5,6 @@ firebase.initializeApp({
  credential: firebase.credential.cert(serviceAccount)
 });
 
-const firestoreDb = firebase.firestore();
+exports.firebaseDb = firebase.firestore();
+exports.firebaseAuth = firebase.auth();
 
-module.exports = firestoreDb;

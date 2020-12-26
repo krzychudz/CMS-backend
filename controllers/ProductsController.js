@@ -1,8 +1,7 @@
 const { json } = require('body-parser');
 const { join } = require('path');
 const { traceDeprecation } = require('process');
-const firestoreDb = require('../firebase');
-const idGenerator = require('../helpers/IdGenerator');
+const firebase = require('../firebase');
 
 const productsCollection = "Products";
 
@@ -12,13 +11,13 @@ exports.createProduct = async (req, res) => {
  
     body.ownerId = userId;
 
-    await firestoreDb.collection(productsCollection).add(body);
+    await firebase.firebaseDb.collection(productsCollection).add(body);
     res.status(201).json(body);
   
 };
 
 exports.getProducts = async (req, res) => {
-    const querySnapshot = await firestoreDb.collection(productsCollection).where("isPublished", "==", true).get();
+    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("isPublished", "==", true).get();
 
     querySnapshot.docs.forEach((document) => {
         console.log(document.data());
@@ -33,9 +32,9 @@ exports.getProducts = async (req, res) => {
 }
 
 exports.getUserProducts = async (req, res) => {
-    const userId = req.params.user_id;
+    const { userId } = req.body;
 
-    const querySnapshot = await firestoreDb.collection(productsCollection).where("ownerId", "==", userId).get();
+    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("ownerId", "==", userId).get();
 
     const productsResponse = querySnapshot.docs.map((document) => {
             return {productId: document.id, ...document.data()}
@@ -45,10 +44,10 @@ exports.getUserProducts = async (req, res) => {
 }
 
 exports.getUserProduct = async (req, res) => {
-    const userId = req.params.user_id;
+    const userId = req.body.userId;
     const productId = req.params.product_id;
 
-    const querySnapshot = await firestoreDb.collection(productsCollection).doc(productId).get();
+    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).doc(productId).get();
 
     const data = querySnapshot.data();
     
@@ -66,12 +65,12 @@ exports.getUserProduct = async (req, res) => {
 }
 
 exports.updateProduct = async (req, res) => {
-    const userId = req.params.user_id;
+    const userId = req.body.userId;
     const productId = req.params.product_id;
     const body = req.body;
 
     try {
-       await firestoreDb.collection(productsCollection).doc(productId).update(body);
+       await firebase.firebaseDb.collection(productsCollection).doc(productId).update(body);
     } catch (error) {
        res.status(500).json(error); 
     }
@@ -80,11 +79,11 @@ exports.updateProduct = async (req, res) => {
 }
 
 exports.deleteProduct = async (req, res) => {
-    const userId = req.params.user_id;
+    const userId = req.body.userId;
     const productId = req.params.product_id;
 
     try {
-        await firestoreDb.collection(productsCollection).doc(productId).delete();
+        await firebase.firebaseDb.collection(productsCollection).doc(productId).delete();
     } catch (error) {
         res.status(500).json(error);
     }
