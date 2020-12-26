@@ -21,51 +21,46 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getProducts = async (req, res) => {
-    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("isPublished", "==", true).get();
-
-    querySnapshot.docs.forEach((document) => {
-        console.log(document.data());
-    });
-
-    const productsResponse = querySnapshot.docs.map((document) => {
-        return {productId: document.id, ...document.data()}
-    });
-
-    res.status(201).json(productsResponse);
-
+    try {
+        const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("isPublished", "==", true).get();
+        const productsResponse = querySnapshot.docs.map((document) => {
+            return {productId: document.id, ...document.data()}
+        });
+        res.status(201).json(productsResponse);
+    } catch (error) {
+        res.status(500).json(error); 
+    }
 }
 
 exports.getUserProducts = async (req, res) => {
     const { userId } = req.body;
 
-    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("ownerId", "==", userId).get();
-
-    const productsResponse = querySnapshot.docs.map((document) => {
+    try {
+        const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("ownerId", "==", userId).get();
+        const productsResponse = querySnapshot.docs.map((document) => {
             return {productId: document.id, ...document.data()}
-    });
-
-    res.status(201).json(productsResponse);
+        });
+        res.status(201).json(productsResponse);
+    } catch (error) {
+        res.status(500).json(error); 
+    }
 }
 
 exports.getUserProduct = async (req, res) => {
     const userId = req.body.userId;
     const productId = req.params.product_id;
 
-    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).doc(productId).get();
-
-    const data = querySnapshot.data();
-    
-    if (data === undefined || data === null) {
-        res.status(404).json({"message": "Not found"})
+    try {
+        const querySnapshot = await firebase.firebaseDb.collection(productsCollection).doc(productId).get();
+        const data = querySnapshot.data();
+        if (data === undefined || data === null) {
+            res.status(404).json({"message": "Not found"})
+        }
+        data.productId = querySnapshot.id;
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(500).json(error); 
     }
-    
-    if (data.ownerId != userId) {
-        res.status(401).json({"message:": "Unauthorized"});
-    }
-
-    data.productId = querySnapshot.id;
-
-    res.status(201).json(data);
 }
 
 exports.updateProduct = async (req, res) => {
@@ -75,11 +70,10 @@ exports.updateProduct = async (req, res) => {
 
     try {
        await firebase.firebaseDb.collection(productsCollection).doc(productId).update(body);
+       res.status(201).json(body);
     } catch (error) {
        res.status(500).json(error); 
     }
-
-    res.status(201).json(body);
 }
 
 exports.deleteProduct = async (req, res) => {
@@ -88,11 +82,10 @@ exports.deleteProduct = async (req, res) => {
 
     try {
         await firebase.firebaseDb.collection(productsCollection).doc(productId).delete();
+        res.status(201).json({"message": `Item ${productId} has been removed`});
     } catch (error) {
         res.status(500).json(error);
     }
-
-    res.status(201).json({"message": `Item ${productId} has been removed`});
 }
 
 exports.findProduct = (req, res) => {
