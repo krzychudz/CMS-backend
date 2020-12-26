@@ -2,6 +2,7 @@ const firebase = require('../firebase');
 
 exports.verifyToken = async (req, res, next) => {
     const idToken = req.headers.authorization;
+    console.log(req.headers)
 
     try {
         const decodedToken = await firebase.firebaseAuth.verifyIdToken(idToken);

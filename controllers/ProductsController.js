@@ -6,14 +6,18 @@ const firebase = require('../firebase');
 const productsCollection = "Products";
 
 exports.createProduct = async (req, res) => {
-    const userId = req.params.user_id;
+    const userId = req.body.userId;
     const body = req.body;
- 
-    body.ownerId = userId;
 
-    await firebase.firebaseDb.collection(productsCollection).add(body);
-    res.status(201).json(body);
-  
+    body.ownerId = userId;
+    delete body['userId'];
+
+    try {
+        await firebase.firebaseDb.collection(productsCollection).add(body);
+        res.status(201).json(body);
+    } catch (error) {
+        res.status(500).json(error); 
+    }
 };
 
 exports.getProducts = async (req, res) => {
