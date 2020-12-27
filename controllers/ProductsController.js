@@ -82,7 +82,7 @@ exports.deleteProduct = async (req, res) => {
 
     try {
         await firebase.firebaseDb.collection(productsCollection).doc(productId).delete();
-        res.status(201).json({"message": `Item ${productId} has been removed`});
+        res.status(201).json({"removedId": productId});
     } catch (error) {
         res.status(500).json(error);
     }
