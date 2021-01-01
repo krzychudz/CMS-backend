@@ -9,10 +9,13 @@ exports.createProduct = async (req, res) => {
     const userId = req.body.userId;
     const body = req.body;
 
-    body.ownerId = userId;
-    delete body['userId'];
-
     try {
+        let userData = await firebase.firebaseAuth.getUser(userId);
+        
+        body.ownerId = userId;
+        body.ownerEmail = userData.email;
+        delete body['userId'];
+
         await firebase.firebaseDb.collection(productsCollection).add(body);
         res.status(201).json(body);
     } catch (error) {
@@ -90,4 +93,8 @@ exports.deleteProduct = async (req, res) => {
 
 exports.findProduct = (req, res) => {
     var query = req.query.query;
+}
+
+exports.getUser = (req, res) => {
+
 }
