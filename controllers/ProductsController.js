@@ -2,6 +2,7 @@ const { json } = require('body-parser');
 const { join } = require('path');
 const { traceDeprecation } = require('process');
 const firebase = require('../firebase');
+const nodemailer = require('../nodemailer');
 
 const productsCollection = "Products";
 
@@ -11,7 +12,7 @@ exports.createProduct = async (req, res) => {
 
     try {
         let userData = await firebase.firebaseAuth.getUser(userId);
-        
+
         body.ownerId = userId;
         body.ownerEmail = userData.email;
         delete body['userId'];
@@ -95,6 +96,18 @@ exports.findProduct = (req, res) => {
     var query = req.query.query;
 }
 
-exports.getUser = (req, res) => {
-
+exports.sendEmail = async (req, res) => {
+    const { userId, recEmail, subject, message } = req.body;
+    try {
+        //let userData = await firebase.firebaseAuth.getUser(userId); 
+        await nodemailer.mailService.sendMail({
+            from: 'No-reply<shop.app@zohomail.eu>',
+            to: recEmail,
+            subject: subject,
+            html: "<b>Test</b>"
+        });
+        res.status(201).json({"message": "success"});
+    } catch (error) {
+        res.status(500).json(error);
+    }
 }
