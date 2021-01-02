@@ -20,7 +20,7 @@ exports.createProduct = async (req, res) => {
         await firebase.firebaseDb.collection(productsCollection).add(body);
         res.status(201).json(body);
     } catch (error) {
-        res.status(500).json(error); 
+        res.status(500).json(error);
     }
 };
 
@@ -28,11 +28,11 @@ exports.getProducts = async (req, res) => {
     try {
         const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("isPublished", "==", true).get();
         const productsResponse = querySnapshot.docs.map((document) => {
-            return {productId: document.id, ...document.data()}
+            return { productId: document.id, ...document.data() }
         });
         res.status(201).json(productsResponse);
     } catch (error) {
-        res.status(500).json(error); 
+        res.status(500).json(error);
     }
 }
 
@@ -42,11 +42,11 @@ exports.getUserProducts = async (req, res) => {
     try {
         const querySnapshot = await firebase.firebaseDb.collection(productsCollection).where("ownerId", "==", userId).get();
         const productsResponse = querySnapshot.docs.map((document) => {
-            return {productId: document.id, ...document.data()}
+            return { productId: document.id, ...document.data() }
         });
         res.status(201).json(productsResponse);
     } catch (error) {
-        res.status(500).json(error); 
+        res.status(500).json(error);
     }
 }
 
@@ -58,12 +58,15 @@ exports.getUserProduct = async (req, res) => {
         const querySnapshot = await firebase.firebaseDb.collection(productsCollection).doc(productId).get();
         const data = querySnapshot.data();
         if (data === undefined || data === null) {
-            res.status(404).json({"message": "Not found"})
+            res.status(404).json({ "message": "Not found" });
+        }
+        if (data.ownerId !== userId) {
+            res.status(401).json({ "message": "Unauthorized" });
         }
         data.productId = querySnapshot.id;
         res.status(201).json(data);
     } catch (error) {
-        res.status(500).json(error); 
+        res.status(500).json(error);
     }
 }
 
@@ -73,10 +76,15 @@ exports.updateProduct = async (req, res) => {
     const body = req.body;
 
     try {
-       await firebase.firebaseDb.collection(productsCollection).doc(productId).update(body);
-       res.status(201).json(body);
+        let isUserOwner = await isProductOwnedByUser(productId, userId);
+        if (!isUserOwner) {
+            res.status(401).json({ "message": "Unauthorized" });
+        }
+        await firebase.firebaseDb.collection(productsCollection).doc(productId).update(body);
+        body.productId = productId;
+        res.status(201).json(body);
     } catch (error) {
-       res.status(500).json(error); 
+        res.status(500).json(error);
     }
 }
 
@@ -85,15 +93,15 @@ exports.deleteProduct = async (req, res) => {
     const productId = req.params.product_id;
 
     try {
+        let isUserOwner = await isProductOwnedByUser(productId, userId);
+        if (!isUserOwner) {
+            res.status(401).json({ "message": "Unauthorized" });
+        }
         await firebase.firebaseDb.collection(productsCollection).doc(productId).delete();
-        res.status(201).json({"removedId": productId});
+        res.status(201).json({ "removedId": productId });
     } catch (error) {
         res.status(500).json(error);
     }
-}
-
-exports.findProduct = (req, res) => {
-    var query = req.query.query;
 }
 
 exports.sendEmail = async (req, res) => {
@@ -106,8 +114,18 @@ exports.sendEmail = async (req, res) => {
             subject: subject,
             html: "<b>Test</b>"
         });
-        res.status(201).json({"message": "success"});
+        res.status(201).json({ "message": "success" });
     } catch (error) {
         res.status(500).json(error);
     }
+}
+
+const isProductOwnedByUser = async (productId, userId) => {
+    const querySnapshot = await firebase.firebaseDb.collection(productsCollection).doc(productId).get();
+    const data = querySnapshot.data();
+    if (data.ownerId !== userId) {
+        return false;
+    }
+
+    return true;
 }
