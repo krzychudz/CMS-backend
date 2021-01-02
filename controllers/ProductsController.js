@@ -13,12 +13,18 @@ exports.createProduct = async (req, res) => {
     try {
         let userData = await firebase.firebaseAuth.getUser(userId);
 
-        body.ownerId = userId;
-        body.ownerEmail = userData.email;
-        delete body['userId'];
+        let productData = {
+            name: body.name,
+            description: body.description,
+            price: body.price,
+            isPublished: body.isPublished,
+            imageUrl: body.imageUrl,
+            ownerId: userId,
+            ownerEmail: userData.email
+        }
 
-        await firebase.firebaseDb.collection(productsCollection).add(body);
-        res.status(201).json(body);
+        await firebase.firebaseDb.collection(productsCollection).add(productData);
+        res.status(201).json(productData);
     } catch (error) {
         res.status(500).json(error);
     }
