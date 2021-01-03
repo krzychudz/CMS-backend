@@ -36,7 +36,7 @@ exports.getProducts = async (req, res) => {
         const productsResponse = querySnapshot.docs.map((document) => {
             return { productId: document.id, ...document.data() }
         });
-        res.status(201).json(productsResponse);
+        res.status(200).json(productsResponse);
     } catch (error) {
         res.status(500).json(error);
     }
@@ -50,7 +50,7 @@ exports.getUserProducts = async (req, res) => {
         const productsResponse = querySnapshot.docs.map((document) => {
             return { productId: document.id, ...document.data() }
         });
-        res.status(201).json(productsResponse);
+        res.status(200).json(productsResponse);
     } catch (error) {
         res.status(500).json(error);
     }
@@ -123,7 +123,7 @@ exports.sendEmail = async (req, res) => {
             subject: subject,
             html: htmlMessageTemplate
         });
-        res.status(201).json({ "message": "success" });
+        res.status(200).json({ "message": "success" });
     } catch (error) {
         res.status(500).json(error);
     }
