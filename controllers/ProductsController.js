@@ -2,7 +2,7 @@ const { json } = require('body-parser');
 const { join } = require('path');
 const { traceDeprecation } = require('process');
 const firebase = require('../firebase');
-const nodemailer = require('../nodemailer');
+//const nodemailer = require('../nodemailer');
 
 const productsCollection = "Products";
 
