@@ -112,21 +112,21 @@ exports.deleteProduct = async (req, res) => {
 
 exports.sendEmail = async (req, res) => {
     const { userId, recEmail, subject, message } = req.body;
-    try {
-        let userData = await firebase.firebaseAuth.getUser(userId); 
+    // try {
+    //     let userData = await firebase.firebaseAuth.getUser(userId); 
 
-        let htmlMessageTemplate = `<b>Witaj ${recEmail}</b> <br> Użytkownik ${userData.email} wysłał zapytanie odnośnie twojego produktu: <br> <br> <p><i>${message}</i></p>`;
+    //     let htmlMessageTemplate = `<b>Witaj ${recEmail}</b> <br> Użytkownik ${userData.email} wysłał zapytanie odnośnie twojego produktu: <br> <br> <p><i>${message}</i></p>`;
 
-        await nodemailer.mailService.sendMail({
-            from: 'No-reply<shop.app@zohomail.eu>',
-            to: recEmail,
-            subject: subject,
-            html: htmlMessageTemplate
-        });
-        res.status(200).json({ "message": "success" });
-    } catch (error) {
-        res.status(500).json(error);
-    }
+    //     await nodemailer.mailService.sendMail({
+    //         from: 'No-reply<shop.app@zohomail.eu>',
+    //         to: recEmail,
+    //         subject: subject,
+    //         html: htmlMessageTemplate
+    //     });
+    //     res.status(200).json({ "message": "success" });
+    // } catch (error) {
+    //     res.status(500).json(error);
+    // }
 }
 
 const isProductOwnedByUser = async (productId, userId) => {
